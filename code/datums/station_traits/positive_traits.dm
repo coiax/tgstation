@@ -68,3 +68,40 @@
 
 /datum/station_trait/strong_supply_lines/on_round_start()
 	SSeconomy.pack_price_modifier *= 0.8
+
+/datum/station_trait/sunglasses
+	name = "Sunglasses"
+	trait_type = STATION_TRAIT_POSITIVE
+	weight = 5
+	show_in_report = TRUE
+	report_message = "Unusual solar activity in the nearby star has led CentCom to issue eye protection to all crew members."
+
+/datum/station_trait/sunglasses/New()
+	. = ..()
+	RegisterSignal(SSdcs, COMSIG_GLOB_JOB_AFTER_SPAWN, .proc/on_job_after_spawn)
+
+/datum/station_trait/sunglasses/proc/on_job_after_spawn(datum/source, datum/job/job, mob/living/living_mob, mob/M, joined_late)
+	if(!iscarbon(living_mob))
+		return
+
+	var/mob/living/carbon/living_carbon = living_mob
+	var/atom/movable/current_glasses = living_carbon.glasses
+
+	// Any roundstart glasses types should be replaced with sunglasses versions
+	var/list/replacement_type = list(
+		/obj/item/clothing/glasses/science = /obj/item/clothing/glasses/sunglasses/chemical,
+		// these are explicitly untouched since they're already sunglasses.
+		/obj/item/clothing/glasses/sunglasses = FALSE,
+		/obj/item/clothing/glasses/hud/security/sunglasses = FALSE,
+		/obj/item/clothing/glasses/sunglasses/reagent = FALSE,
+	)
+
+	var/new_type = /obj/item/clothing/glasses/sunglasses
+	if(current_glasses)
+		new_type = replacement_type[current_glasses.type]
+
+	if(new_type)
+		qdel(current_glasses)
+
+		var/turf/turf = get_turf(living_carbon)
+		living_carbon.equip_to_slot_or_del(new new_type(turf), ITEM_SLOT_EYES)
