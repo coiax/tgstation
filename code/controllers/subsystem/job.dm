@@ -422,11 +422,14 @@ SUBSYSTEM_DEF(job)
 
 	//If we joined at roundstart we should be positioned at our workstation
 	if(!joined_late)
+		var/spawning_handled = FALSE
 		var/obj/S = null
 		if(HAS_TRAIT(SSstation, STATION_TRAIT_LATE_ARRIVALS))
 			SendToLateJoin(living_mob)
+			spawning_handled = TRUE
 		else if(HAS_TRAIT(SSstation, STATION_TRAIT_RANDOM_ARRIVALS))
-			DropLandAtRandomPoint(living_mob)
+			DropLandAtRandomHallwayPoint(living_mob)
+			spawning_handled = TRUE
 		else if(length(GLOB.jobspawn_overrides[rank]))
 			S = pick(GLOB.jobspawn_overrides[rank])
 		else
@@ -441,7 +444,7 @@ SUBSYSTEM_DEF(job)
 				break
 		if(S)
 			S.JoinPlayerHere(living_mob, FALSE)
-		if(!S) //if there isn't a spawnpoint send them to latejoin, if there's no latejoin go yell at your mapper
+		if(!S && !spawning_handled) //if there isn't a spawnpoint send them to latejoin, if there's no latejoin go yell at your mapper
 			log_world("Couldn't find a round start spawn point for [rank]")
 			if(!SendToLateJoin(living_mob))
 				living_mob.move_to_error_room()
@@ -669,9 +672,9 @@ SUBSYSTEM_DEF(job)
 		message_admins(msg)
 		CRASH(msg)
 
-///Lands specified mob at a random spot on the station bar some blacklisted places
-/datum/controller/subsystem/job/proc/DropLandAtRandomPoint(mob/living/living_mob)
-	var/turf/spawn_turf = get_safe_random_station_turf()
+///Lands specified mob at a random spot in the hallways
+/datum/controller/subsystem/job/proc/DropLandAtRandomHallwayPoint(mob/living/living_mob)
+	var/turf/spawn_turf = get_safe_random_station_turf(list(typesof(/area/hallway)))
 
 	var/obj/structure/closet/supplypod/centcompod/toLaunch = new()
 	living_mob.forceMove(toLaunch)

@@ -23,6 +23,8 @@
 	#define COMPONENT_GLOB_BLOCK_CINEMATIC (1<<0)
 /// ingame button pressed (/obj/machinery/button/button)
 #define COMSIG_GLOB_BUTTON_PRESSED "!button_pressed"
+/// crewmember joined the game (mob/living, rank)
+#define COMSIG_GLOB_CREWMEMBER_JOINED "!crewmember_joined"
 /// job subsystem has spawned and equipped a new mob
 #define COMSIG_GLOB_JOB_AFTER_SPAWN "!job_after_spawn"
 
@@ -52,6 +54,10 @@
 #define COMSIG_ELEMENT_ATTACH "element_attach"
 /// fires on the target datum when an element is attached to it  (/datum/element)
 #define COMSIG_ELEMENT_DETACH "element_detach"
+
+///Subsystem signals
+///From base of datum/controller/subsystem/Initialize: (start_timeofday)
+#define COMSIG_SUBSYSTEM_POST_INITIALIZE "subsystem_post_initialize"
 
 // /atom signals
 ///from base of atom/proc/Initialize(): sent any time a new atom is created
@@ -84,6 +90,8 @@
 #define COMSIG_ATOM_UPDATE_OVERLAYS "atom_update_overlays"
 ///from base of atom/update_icon(): (signalOut, did_anything)
 #define COMSIG_ATOM_UPDATED_ICON "atom_updated_icon"
+///from base of [atom/proc/set_smoothed_icon_state]: (old_junction, new_junction)
+#define COMSIG_ATOM_SMOOTH_BITMASK	"atom_smooth_bitmask"
 ///from base of atom/Entered(): (atom/movable/entering, /atom)
 #define COMSIG_ATOM_ENTERED "atom_entered"
 ///from base of atom/Exit(): (/atom/movable/exiting, /atom/newloc)
@@ -609,6 +617,8 @@
 	#define COMPONENT_HANDLED_GRILLING (1<<0)
 ///Called when an object is turned into another item through grilling ontop of a griddle
 #define COMSIG_GRILL_COMPLETED "item_grill_completed"
+///Called when an armor plate is successfully applied to an object
+#define COMSIG_ARMOR_PLATED "armor_plated"
 
 ///from base of [/obj/item/proc/tool_check_callback]: (mob/living/user)
 #define COMSIG_TOOL_IN_USE "tool_in_use"
@@ -996,3 +1006,9 @@
 #define COMSIG_HUMAN_EARLY_UNARMED_ATTACK "human_early_unarmed_attack"
 ///from mob/living/carbon/human/UnarmedAttack(): (atom/target, proximity)
 #define COMSIG_HUMAN_MELEE_UNARMED_ATTACK "human_melee_unarmed_attack"
+
+
+// Aquarium related signals
+#define COMSIG_AQUARIUM_BEFORE_INSERT_CHECK "aquarium_about_to_be_inserted"
+#define COMSIG_AQUARIUM_SURFACE_CHANGED "aquarium_surface_changed"
+#define COMSIG_AQUARIUM_FLUID_CHANGED "aquarium_fluid_changed"
