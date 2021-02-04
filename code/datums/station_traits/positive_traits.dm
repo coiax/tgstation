@@ -5,17 +5,17 @@
 /datum/station_trait/lucky_winner
 	name = "Lucky winner"
 	trait_type = STATION_TRAIT_POSITIVE
-	weight = 100
+	weight = 1
 	show_in_report = TRUE
 	report_message = "Your station has won the grand prize of the annual station charity event. Free snacks will be delivered to the bar every now and then."
 	trait_processes = TRUE
 	COOLDOWN_DECLARE(party_cooldown)
 
 /datum/station_trait/lucky_winner/on_round_start()
+	. = ..()
 	COOLDOWN_START(src, party_cooldown, rand(PARTY_COOLDOWN_LENGTH_MIN, PARTY_COOLDOWN_LENGTH_MAX))
 
 /datum/station_trait/lucky_winner/process(delta_time)
-	. = ..()
 	if(!COOLDOWN_FINISHED(src, party_cooldown))
 		return
 
@@ -59,12 +59,15 @@
 
 /datum/station_trait/bountiful_bounties/on_round_start()
 	SSeconomy.bounty_modifier *= 1.2
+
 /datum/station_trait/strong_supply_lines
 	name = "Strong supply lines"
 	trait_type = STATION_TRAIT_POSITIVE
 	weight = 5
 	show_in_report = TRUE
 	report_message = "Prices are low in this system, BUY BUY BUY!"
+	blacklist = list(/datum/station_trait/distant_supply_lines)
+
 
 /datum/station_trait/strong_supply_lines/on_round_start()
 	SSeconomy.pack_price_modifier *= 0.8
@@ -72,7 +75,7 @@
 /datum/station_trait/scarves
 	name = "Scarves"
 	trait_type = STATION_TRAIT_POSITIVE
-	weight = 500000000000
+	weight = 5
 	show_in_report = TRUE
 	var/list/scarves
 
@@ -95,6 +98,28 @@
 	RegisterSignal(SSdcs, COMSIG_GLOB_JOB_AFTER_SPAWN, .proc/on_job_after_spawn)
 
 /datum/station_trait/scarves/proc/on_job_after_spawn(datum/source, datum/job/job, mob/living/living_mob, mob/M, joined_late)
+	SIGNAL_HANDLER
 	var/scarf_type = pick(scarves)
 
 	living_mob.equip_to_slot_or_del(new scarf_type(living_mob), ITEM_SLOT_NECK, initial = FALSE)
+
+/datum/station_trait/filled_maint
+	name = "Filled up maintenance"
+	trait_type = STATION_TRAIT_POSITIVE
+	weight = 5
+	show_in_report = TRUE
+	report_message = "Our workers accidentaly forgot more of their personal belongings in the maintenace areas."
+	blacklist = list(/datum/station_trait/empty_maint)
+	trait_to_give = STATION_TRAIT_FILLED_MAINT
+
+/datum/station_trait/quick_shuttle
+	name = "Quick Shuttle"
+	trait_type = STATION_TRAIT_NEUTRAL
+	weight = 5
+	show_in_report = TRUE
+	report_message = "Due to proximity to our supply station, the cargo shuttle will have a quicker flight time to your cargo department/"
+	blacklist = list(/datum/station_trait/slow_shuttle)
+
+/datum/station_trait/quick_shuttle/on_round_start()
+	. = ..()
+	SSshuttle.supply.callTime *= 0.5

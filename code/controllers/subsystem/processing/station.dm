@@ -9,9 +9,18 @@ PROCESSING_SUBSYSTEM_DEF(station)
 	var/list/station_traits = list()
 	///Assoc list of trait type || assoc list of traits with weighted value. Used for picking traits from a specific category.
 	var/list/selectable_traits_by_types = list(STATION_TRAIT_POSITIVE = list(), STATION_TRAIT_NEUTRAL = list(), STATION_TRAIT_NEGATIVE = list())
+	///Currently active announcer. Starts as a type but gets initialized after traits are selected
+	var/datum/centcom_announcer/announcer = /datum/centcom_announcer/default
 
 /datum/controller/subsystem/processing/station/Initialize(timeofday)
+
+	//If doing unit tests we don't do none of that trait shit ya know?
+	#ifndef UNIT_TESTS
 	SetupTraits()
+	#endif
+
+	announcer = new announcer() //Initialize the station's announcer datum
+
 	return ..()
 
 ///Rolls for the amount of traits and adds them to the traits list
@@ -20,9 +29,9 @@ PROCESSING_SUBSYSTEM_DEF(station)
 		var/datum/station_trait/trait_typepath = i
 		selectable_traits_by_types[initial(trait_typepath.trait_type)][trait_typepath] = initial(trait_typepath.weight)
 
-	var/positive_trait_count = pick(10;0, 5;1, 1;2)
+	var/positive_trait_count = pick(12;0, 5;1, 1;2)
 	var/neutral_trait_count = pick(5;0, 10;1, 3;2)
-	var/negative_trait_count = pick(10;0, 500;1, 1;2)
+	var/negative_trait_count = pick(12;0, 5;1, 1;2)
 
 	pick_traits(STATION_TRAIT_POSITIVE, positive_trait_count)
 	pick_traits(STATION_TRAIT_NEUTRAL, neutral_trait_count)
@@ -32,12 +41,12 @@ PROCESSING_SUBSYSTEM_DEF(station)
 /datum/controller/subsystem/processing/station/proc/pick_traits(trait_type, amount)
 	if(!amount)
 		return
-	var/datum/station_trait/picked_trait = pickweight(selectable_traits_by_types[trait_type]) //Rolls from the table for the specific trait type
-	picked_trait = new picked_trait()
-	station_traits += picked_trait
-	if(!picked_trait.blacklist)
-		return
-	for(var/i in picked_trait.blacklist)
-		var/datum/station_trait/trait_to_remove = i
-		selectable_traits_by_types[initial(trait_to_remove.trait_type)] -= trait_to_remove
-
+	for(var/iterator in 1 to amount)
+		var/datum/station_trait/picked_trait = pickweight(selectable_traits_by_types[trait_type]) //Rolls from the table for the specific trait type
+		picked_trait = new picked_trait()
+		station_traits += picked_trait
+		if(!picked_trait.blacklist)
+			return
+		for(var/i in picked_trait.blacklist)
+			var/datum/station_trait/trait_to_remove = i
+			selectable_traits_by_types[initial(trait_to_remove.trait_type)] -= trait_to_remove
